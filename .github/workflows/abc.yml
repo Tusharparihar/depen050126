@@ -6,7 +6,7 @@ on:
       - 'feature/**'
 
     paths:
-      - 'tf-cosmosdb/**'
+      - '/'
 
 jobs:
   detect_changes:
