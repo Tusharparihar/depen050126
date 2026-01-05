@@ -1,0 +1,199 @@
+name: 'tf-cosmosdb.yml'
+on:
+  push:
+    branches:
+      - master
+      - 'feature/**'
+
+    paths:
+      - 'tf-cosmosdb/**'
+
+jobs:
+  detect_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      dev: ${{ steps.path-check.outputs.dev }}
+      qa1: ${{ steps.path-check.outputs.qa1 }}
+      sit: ${{ steps.path-check.outputs.sit }}
+      euvnv: ${{ steps.path-check.outputs.euvnv }}
+      eusit: ${{ steps.path-check.outputs.eusit }}
+      euprd: ${{ steps.path-check.outputs.euprd }}
+      usprd: ${{ steps.path-check.outputs.usprd }}
+      env_count: ${{ steps.path-check.outputs.env_count }}
+      multiple_envs: ${{ steps.path-check.outputs.multiple_envs }}
+      error_message: ${{ steps.path-check.outputs.error_message }}
+    steps:
+      - name: Checkout Repo
+        uses: tandemdiabetes/gh-actions-reusable-workflows/.github/actions/checkout-job@v3.3.1
+        with:
+          gh_repo_access_pat: '${{ secrets.GH_REPO_ACCESS_PAT }}'
+
+      - name: Smart Change Detection
+        id: path-check
+        uses: tandemdiabetes/gh-actions-reusable-workflows/.github/actions/check-path-changes@v3.3.1
+        with:
+          working_dir: tf-cosmosdb
+          target_environments: '["dev", "qa1", "euvnv", "eusit", "euprd", "usprd", "sit"]'
+
+      - name: Fail if multiple environments detected
+        if: steps.path-check.outputs.multiple_envs == 'true'
+        run: |
+          echo ::error::${{ steps.path-check.outputs.error_message }}
+          exit 1
+
+  ########################################################################
+  ## OIDC Workflow ##
+  terraform_operations:
+    needs: detect_changes
+    if: |
+      (needs.detect_changes.outputs.qa1 == 'true' || needs.detect_changes.outputs.dev == 'true' || needs.detect_changes.outputs.euvnv == 'true' || needs.detect_changes.outputs.euprd == 'true' || needs.detect_changes.outputs.eusit == 'true' || needs.detect_changes.outputs.sit == 'true' || needs.detect_changes.outputs.usprd == 'true') &&      
+      needs.detect_changes.outputs.multiple_envs != 'true'
+    uses: tandemdiabetes/gh-actions-reusable-workflows/.github/workflows/terraform_plan_apply.yml@v3.3.1
+    with:
+      target_environments: '["dev", "qa1", "euvnv", "eusit", "euprd", "usprd", "sit"]'
+      working_dir: tf-cosmosdb
+      tf_version: 1.10.5
+      storage_account_name: stgeneralscripts
+    secrets:
+      GH_REPO_ACCESS_PAT: ${{ secrets.GH_REPO_ACCESS_PAT }}
+      terraform_plan_storage_account_key: ${{ secrets.automation_storage_account_key }}
+
+  wizscan_dev:
+    name: wiz scan dev
+    needs: [detect_changes, terraform_operations]
+    if: |
+      needs.detect_changes.outputs.dev == 'true' && 
+      needs.detect_changes.outputs.multiple_envs != 'true' &&
+      needs.terraform_operations.outputs.dev_plan_succeeded == 'true'
+    uses: tandemdiabetes/gh-actions-reusable-workflows/.github/workflows/wiz_iac_scan.yml@v3.3.1
+    with:
+      environment: dev-plan
+      target_env: dev
+      workflow_name: tf-cosmosdb.yml
+      storage_account_name: stgeneralscripts
+    secrets:
+      wiz_client_id: ${{ secrets.WIZ_CLIENT_ID }}
+      wiz_client_secret: ${{ secrets.WIZ_CLIENT_SECRET }}
+      wiz_pr_msteams_webhook: ${{ secrets.WIZ_PR_MSTEAMS_WEBHOOK }}
+      gh_repo_access_pat: ${{ secrets.GH_REPO_ACCESS_PAT }}
+      storage_account_key: ${{ secrets.automation_storage_account_key }}
+
+  wizscan_qa1:
+    name: wiz scan qa1
+    needs: [detect_changes, terraform_operations]
+    if: |
+      needs.detect_changes.outputs.qa1 == 'true' && 
+      needs.detect_changes.outputs.multiple_envs != 'true' &&
+      needs.terraform_operations.outputs.qa1_plan_succeeded == 'true'
+    uses: tandemdiabetes/gh-actions-reusable-workflows/.github/workflows/wiz_iac_scan.yml@v3.3.1
+    with:
+      environment: qa1-plan
+      target_env: qa1
+      workflow_name: tf-cosmosdb.yml
+      storage_account_name: stgeneralscripts
+    secrets:
+      wiz_client_id: ${{ secrets.WIZ_CLIENT_ID }}
+      wiz_client_secret: ${{ secrets.WIZ_CLIENT_SECRET }}
+      wiz_pr_msteams_webhook: ${{ secrets.WIZ_PR_MSTEAMS_WEBHOOK }}
+      gh_repo_access_pat: ${{ secrets.GH_REPO_ACCESS_PAT }}
+      storage_account_key: ${{ secrets.automation_storage_account_key }}
+
+  wizscan_euvnv:
+    name: wiz scan euvnv
+    needs: [detect_changes, terraform_operations]
+    if: |
+      needs.detect_changes.outputs.euvnv == 'true' && 
+      needs.detect_changes.outputs.multiple_envs != 'true' &&
+      needs.terraform_operations.outputs.euvnv_plan_succeeded == 'true'
+    uses: tandemdiabetes/gh-actions-reusable-workflows/.github/workflows/wiz_iac_scan.yml@v3.3.1
+    with:
+      environment: euvnv-plan
+      target_env: euvnv
+      workflow_name: tf-cosmosdb.yml
+      storage_account_name: stgeneralscripts
+    secrets:
+      wiz_client_id: ${{ secrets.WIZ_CLIENT_ID }}
+      wiz_client_secret: ${{ secrets.WIZ_CLIENT_SECRET }}
+      wiz_pr_msteams_webhook: ${{ secrets.WIZ_PR_MSTEAMS_WEBHOOK }}
+      gh_repo_access_pat: ${{ secrets.GH_REPO_ACCESS_PAT }}
+      storage_account_key: ${{ secrets.automation_storage_account_key }}
+
+  wizscan_euprd:
+    name: wiz scan euprd
+    needs: [detect_changes, terraform_operations]
+    if: |
+      needs.detect_changes.outputs.euprd == 'true' && 
+      needs.detect_changes.outputs.multiple_envs != 'true' &&
+      needs.terraform_operations.outputs.euprd_plan_succeeded == 'true'
+    uses: tandemdiabetes/gh-actions-reusable-workflows/.github/workflows/wiz_iac_scan.yml@v3.3.1
+    with:
+      environment: euprd-plan
+      target_env: euprd
+      workflow_name: tf-cosmosdb.yml
+      storage_account_name: stgeneralscripts
+    secrets:
+      wiz_client_id: ${{ secrets.WIZ_CLIENT_ID }}
+      wiz_client_secret: ${{ secrets.WIZ_CLIENT_SECRET }}
+      wiz_pr_msteams_webhook: ${{ secrets.WIZ_PR_MSTEAMS_WEBHOOK }}
+      gh_repo_access_pat: ${{ secrets.GH_REPO_ACCESS_PAT }}
+      storage_account_key: ${{ secrets.automation_storage_account_key }}
+
+  wizscan_eusit:
+    name: wiz scan eusit
+    needs: [detect_changes, terraform_operations]
+    if: |
+      needs.detect_changes.outputs.eusit == 'true' && 
+      needs.detect_changes.outputs.multiple_envs != 'true' &&
+      needs.terraform_operations.outputs.eusit_plan_succeeded == 'true'
+    uses: tandemdiabetes/gh-actions-reusable-workflows/.github/workflows/wiz_iac_scan.yml@v3.3.1
+    with:
+      environment: eusit-plan
+      target_env: eusit
+      workflow_name: tf-cosmosdb.yml
+      storage_account_name: stgeneralscripts
+    secrets:
+      wiz_client_id: ${{ secrets.WIZ_CLIENT_ID }}
+      wiz_client_secret: ${{ secrets.WIZ_CLIENT_SECRET }}
+      wiz_pr_msteams_webhook: ${{ secrets.WIZ_PR_MSTEAMS_WEBHOOK }}
+      gh_repo_access_pat: ${{ secrets.GH_REPO_ACCESS_PAT }}
+      storage_account_key: ${{ secrets.automation_storage_account_key }}
+
+  wizscan_usprd:
+    name: wiz scan usprd
+    needs: [detect_changes, terraform_operations]
+    if: |
+      needs.detect_changes.outputs.usprd == 'true' && 
+      needs.detect_changes.outputs.multiple_envs != 'true' &&
+      needs.terraform_operations.outputs.usprd_plan_succeeded == 'true'
+    uses: tandemdiabetes/gh-actions-reusable-workflows/.github/workflows/wiz_iac_scan.yml@v3.3.1
+    with:
+      environment: usprd-plan
+      target_env: usprd
+      workflow_name: tf-cosmosdb.yml
+      storage_account_name: stgeneralscripts
+    secrets:
+      wiz_client_id: ${{ secrets.WIZ_CLIENT_ID }}
+      wiz_client_secret: ${{ secrets.WIZ_CLIENT_SECRET }}
+      wiz_pr_msteams_webhook: ${{ secrets.WIZ_PR_MSTEAMS_WEBHOOK }}
+      gh_repo_access_pat: ${{ secrets.GH_REPO_ACCESS_PAT }}
+      storage_account_key: ${{ secrets.automation_storage_account_key }}
+
+  wizscan_sit:
+    name: wiz scan sit
+    needs: [detect_changes, terraform_operations]
+    if: |
+      needs.detect_changes.outputs.sit == 'true' && 
+      needs.detect_changes.outputs.multiple_envs != 'true' &&
+      needs.terraform_operations.outputs.sit_plan_succeeded == 'true'
+    uses: tandemdiabetes/gh-actions-reusable-workflows/.github/workflows/wiz_iac_scan.yml@v3.3.1
+    with:
+      environment: sit-plan
+      target_env: sit
+      workflow_name: tf-cosmosdb.yml
+      storage_account_name: stgeneralscripts
+    secrets:
+      wiz_client_id: ${{ secrets.WIZ_CLIENT_ID }}
+      wiz_client_secret: ${{ secrets.WIZ_CLIENT_SECRET }}
+      wiz_pr_msteams_webhook: ${{ secrets.WIZ_PR_MSTEAMS_WEBHOOK }}
+      gh_repo_access_pat: ${{ secrets.GH_REPO_ACCESS_PAT }}
+      storage_account_key: ${{ secrets.automation_storage_account_key }}
