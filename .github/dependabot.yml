@@ -1,8 +1,15 @@
 version: 2
 updates:
   - package-ecosystem: "terraform"
-    directory: "/"
+    directory: "/tf-cosmosdb"
     schedule:
       interval: "cron"
-      cronjob: "0 0 * * *"   # every 24 hours (midnight UTC)
+      cronjob: "0 0 * * *"    # midnight UTC
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: "terraform"
+    directory: "/tf-hcl"
+    schedule:
+      interval: "cron"
+      cronjob: "10 0 * * *"   # midnight UTC + 10 min
     open-pull-requests-limit: 1
