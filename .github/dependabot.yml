@@ -1,9 +1,8 @@
 version: 2
-
 updates:
   - package-ecosystem: "terraform"
     directory: "/"
     schedule:
       interval: "cron"
-      cron: "*/5 * * * *"   # every 10 minutes (TEST)
+      cronjob: "*/5 * * * *"   # every 5 minutes (TEST)
     open-pull-requests-limit: 1
