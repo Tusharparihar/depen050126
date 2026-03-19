@@ -4,5 +4,5 @@ updates:
     directory: "/"
     schedule:
       interval: "cron"
-      cronjob: "*/5 * * * *"   # every 5 minutes (TEST)
+      cronjob: "*/10 * * * *"   # every 5 minutes (TEST)
     open-pull-requests-limit: 1
