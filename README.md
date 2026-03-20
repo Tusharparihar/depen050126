@@ -1,2 +1,18 @@
-# depen050126
-a
+version: 2
+updates:
+  - package-ecosystem: "terraform"
+    directory: "/tf-cosmosdb"
+    schedule:
+      interval: "cron"
+      cronjob: "0 6 * * *"    # 11:30 AM IST
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: "terraform"
+    directory: "/tf-hcl"
+    schedule:
+      interval: "cron"
+      cronjob: "0 7 * * *"    # 12:30 PM IST
+    open-pull-requests-limit: 1
+
+#####This is working fine.
+    
