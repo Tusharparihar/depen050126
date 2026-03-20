@@ -4,12 +4,12 @@ updates:
     directory: "/tf-cosmosdb"
     schedule:
       interval: "cron"
-      cronjob: "0 0 * * *"    # midnight UTC
+      cronjob: "0 7 * * *"    # 12:30 PM IST
     open-pull-requests-limit: 1
 
   - package-ecosystem: "terraform"
     directory: "/tf-hcl"
     schedule:
       interval: "cron"
-      cronjob: "10 0 * * *"   # midnight UTC + 10 min
+      cronjob: "0 8 * * *"    # 1:30 PM IST
     open-pull-requests-limit: 1
