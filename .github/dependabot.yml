@@ -1,15 +1,33 @@
+# version: 2
+# updates:
+#   - package-ecosystem: "terraform"
+#     directory: "/tf-cosmosdb"
+#     schedule:
+#       interval: "cron"
+#       cronjob: "0 6 * * *"    # 11:30 AM IST
+#     open-pull-requests-limit: 1
+
+#   - package-ecosystem: "terraform"
+#     directory: "/tf-hcl"
+#     schedule:
+#       interval: "cron"
+#       cronjob: "0 7 * * *"    # 12:30 PM IST
+#     open-pull-requests-limit: 1
+
+##########NEW HALF AN HOUR WE ARE CHECKING ###########
+
 version: 2
 updates:
   - package-ecosystem: "terraform"
     directory: "/tf-cosmosdb"
     schedule:
       interval: "cron"
-      cronjob: "0 6 * * *"    # 11:30 AM IST
+      cronjob: "30 10 * * *"    # 4:00 PM IST
     open-pull-requests-limit: 1
 
   - package-ecosystem: "terraform"
     directory: "/tf-hcl"
     schedule:
       interval: "cron"
-      cronjob: "0 7 * * *"    # 12:30 PM IST
+      cronjob: "0 11 * * *"     # 4:30 PM IST
     open-pull-requests-limit: 1
