@@ -1,3 +1,3 @@
 module "vnet" {
-  source = "git::https://github.com/Tusharparihar/terraform-vnet-test.git?ref=v1.1.1"
+  source = "git::https://github.com/Tusharparihar/terraform-vnet-test.git?ref=v2.0.0"
 }
